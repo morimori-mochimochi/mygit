@@ -50,4 +50,6 @@ end
 
 init()
 puts "Target file: test.txt"
-File.write
+File.write("test.txt", "Hello, Git!")
+hash = hash_obejct("test.txt")
+puts "Success! Hash is #{hash}!"

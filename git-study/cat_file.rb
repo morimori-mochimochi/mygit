@@ -26,3 +26,12 @@ def cat_file(sha1)
 
   content
 end
+
+File.write("message.txt", "RubyでGitを書くのは楽しい！")
+sha = hash_object("message.txt")
+puts "Saved hash: #{sha}"
+
+retrieved_content = cat_file(sha)
+
+puts "--- Retrieved Content ---"
+puts "Retrieved content: #{retrieved_content}"

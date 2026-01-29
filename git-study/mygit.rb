@@ -41,8 +41,12 @@ def hash_object(file_path)
 
   # オブジェクトを格納するディレクトリを作成
   FileUtils.mkdir_p(path)
+
+  # すでにオブジェクトが存在する場合は何もしない
+  return sha1 if File.exist?("#{path}/#{file_name}")
+
   # 容量節約のためにオブジェクトを圧縮する
-  Zlib::Deflate(store).then do |compressed|
+  Zlib::deflate(store).then do |compressed|
    # 圧縮したデータを計算したパスにファイルとして書き込む
    File.write("#{path}/#{file_name}", compressed)
   end
@@ -50,8 +54,42 @@ def hash_object(file_path)
   sha1
 end
 
+def cat_file(sha1)
+  # パスの復元
+  dir_name = sha1[0..1]
+  file_name = sha1[2..-1]
+  path = ".git/objects/#{dir_name}/#{file_name}"
+
+  unless File.exist?(path)
+    puts "Objects not found!"
+    return
+  end
+
+  # ファイルを読み込んで解凍する
+  # compress: 圧縮する
+  # inflate: 膨らます
+  compressed_data = File.read(path)
+  raw_data = Zlib::Inflate.inflate(compressed_data)
+
+  # ヘッダーと中身を分離する
+  # Git式は”blob <size>\0<content>"という形式なので、\0で分割する
+  header, content = raw_data.split("\0", 2)
+  puts "DEBUG: header is #{header}"
+
+  content
+end
+
 init()
 puts "Target file: test.txt"
 File.write("test.txt", "Hello, Git!")
-hash = hash_obejct("test.txt")
+hash = hash_object("test.txt")
 puts "Success! Hash is #{hash}!"
+
+File.write("message.txt", "RubyでGitを書くのは楽しい！")
+sha = hash_object("message.txt")
+puts "Saved hash: #{sha}"
+
+retrieved_content = cat_file(sha)
+
+puts "--- Retrieved Content ---"
+puts "Retrieved content: #{retrieved_content}"

@@ -79,6 +79,45 @@ def cat_file(sha1)
   content
 end
 
+def write_tree
+  entries = []
+
+  # カレントディレクトリのファイル(.git以外)をループ
+  Dir.glob('*').each do |file_name|
+    next if file_name == '.git'
+
+    # ファイルをBlobとして保存してハッシュを得る
+    sha1_hex = hash_object(file_name)
+
+    # ハッシュ値をバイナリに変換
+    # ("H*"): packメソッドに渡す16進数->2進数変換の命令。Hex=16進数の頭文字
+    sha1_binary = [sha1_hex].pack('H*')
+
+    # Treeのエントリを作成
+    # 100644: ファイルの権限モード
+    entries << "100644 #{file_name}\0#{sha1_binary}"
+  end
+
+  # 全エントリを合体させてTreeオブジェクトを作る
+  tree_content = entries.join
+
+  # Tree用のヘッダーをつけて保存
+  header = "tree #{tree_content.bytesize}\0"
+  store = header + tree_content
+  sha1 = Digest::SHA1.hexdigest(store)
+
+  # zlib圧縮して保存
+  save_object(sha1, store)
+
+  sha1
+ end
+
+def save_object(sha1, store)
+  path = ".git/objects/#{sha1[0..1]}/#{sha1[2..-1]}"
+  FileUtils.mkdir_p(File.dirname(path))
+  File.write(path, Zlib::Deflate.deflate(store))
+end
+
 init()
 puts "Target file: test.txt"
 File.write("test.txt", "Hello, Git!")

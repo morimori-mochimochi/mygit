@@ -6,7 +6,7 @@ require 'zlib'
 # git initが実行された時の処理内容を書く
 def init
  # オブジェクトDBを格納するためのディレクトリを作成
- # ファイルの内容（Blob）、ディレクトリ構造（Tree)、コミット情報（Commit）などがオブジェクトとして圧縮され、保存される
+ # ファイルの内容（Blob）、ディレクトリ構造（Tree)、コミット情報（Commit）などがオブジェクトとして圧縮して保存する親ディレクトリ
   FileUtils.mkdir_p('.git/objects')
   # 各ブランチの最新のコミットを指し示す「参照（reference)」を保存するためのディレクトリを作成
   # 例）mainブランチの場合は、mainという名前のファイルがこのディレクトリに作成され、
@@ -102,6 +102,8 @@ def write_tree
 
     # Treeのエントリを作成
     # 100644: ファイルの権限モード
+    # 実際のGitではディレクトリとファイルを見分け、
+    # ディレクトリの時はもう一度write_treeを呼び出す必要があるが、ここでは省略
     entries << "100644 #{file_name}\0#{sha1_binary}"
   end
 
@@ -121,6 +123,7 @@ end
 
 def save_object(sha1, store)
   path = ".git/objects/#{sha1[0..1]}/#{sha1[2..-1]}"
+
   FileUtils.mkdir_p(File.dirname(path))
   File.write(path, Zlib::Deflate.deflate(store))
 end

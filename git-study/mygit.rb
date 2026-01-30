@@ -79,6 +79,13 @@ def cat_file(sha1)
   content
 end
 
+# treeは　
+# Tree A (ルート)
+#  Blob: readme.txt
+#  Tree B (srcフォルダ)
+#   Blob: main.rb
+#   Tree C (libフォルダ) ...
+# このような構造を実現することができる
 def write_tree
   entries = []
 
@@ -110,7 +117,7 @@ def write_tree
   save_object(sha1, store)
 
   sha1
- end
+end
 
 def save_object(sha1, store)
   path = ".git/objects/#{sha1[0..1]}/#{sha1[2..-1]}"

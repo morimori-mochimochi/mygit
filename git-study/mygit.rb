@@ -5,8 +5,8 @@ require 'zlib'
 # 初期： .gitディレクトリを作成する
 # git initが実行された時の処理内容を書く
 def init
- # オブジェクトDBを格納するためのディレクトリを作成
- # ファイルの内容（Blob）、ディレクトリ構造（Tree)、コミット情報（Commit）などがオブジェクトとして圧縮して保存する親ディレクトリ
+  # オブジェクトDBを格納するためのディレクトリを作成
+  # ファイルの内容（Blob）、ディレクトリ構造（Tree)、コミット情報（Commit）などがオブジェクトとして圧縮して保存する親ディレクトリ
   FileUtils.mkdir_p('.git/objects')
   # 各ブランチの最新のコミットを指し示す「参照（reference)」を保存するためのディレクトリを作成
   # 例）mainブランチの場合は、mainという名前のファイルがこのディレクトリに作成され、
@@ -14,6 +14,8 @@ def init
   FileUtils.mkdir_p('.git/refs/heads')
   # 現在作業中のブランチがどれかを示す参照ファイルを作成
   # ここに書き込むことでリポジトリの現在のブランチを指定できる
+  # /nは改行コード
+  # writeは指定されたファイルが存在しない時は新規作成する
   File.write('.git/HEAD', "ref: refs/heads/main\n")
   puts "Initialized empty Git repository"
 end
@@ -165,7 +167,7 @@ puts "Success! Hash is #{hash}!"
 
 retrieved_content = cat_file(hash)
 
-tree_sha = write_tree()
+tree_sha1 = write_tree()
 
 commit_sha = commit_tree(tree_sha, "my first commit!")
 

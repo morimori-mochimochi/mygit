@@ -169,7 +169,13 @@ retrieved_content = cat_file(hash)
 
 tree_sha1 = write_tree()
 
-commit_sha = commit_tree(tree_sha, "my first commit!")
+# 親コミット（現在のHEAD）があれば取得して parent_sha1 として渡す
+parent_sha1 = nil
+if File.exist?('.git/refs/heads/main')
+  parent_sha1 = File.read('.git/refs/heads/main').strip
+end
+
+commit_sha = commit_tree(tree_sha1, "my first commit!", parent_sha1)
 
 puts "--- Retrieved Content ---"
 puts "Retrieved content: #{retrieved_content}"
